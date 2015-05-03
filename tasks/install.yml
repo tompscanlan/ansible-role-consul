@@ -16,6 +16,7 @@
   get_url: >
     url={{consul_download}}
     dest={{consul_download_folder}}
+    validate_certs=no
   register: consul_was_downloaded
 
 - name: create consul group
