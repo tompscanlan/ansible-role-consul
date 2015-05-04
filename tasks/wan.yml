@@ -1,0 +1,3 @@
+---
+- name: WAN Connect consul data centers
+  command: /opt/consul/bin/consul join -wan "{{ consul_join_wan_addrs }}"
