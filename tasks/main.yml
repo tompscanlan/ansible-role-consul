@@ -1,7 +1,7 @@
 ---
 - include: install.yml
-- { include: install-ui.yml, when: consul_is_ui == true }
-- { include: dnsmasq.yml, when: consul_install_dnsmasq == true }
+- { include: install-ui.yml, when: consul_is_ui }
+- { include: dnsmasq.yml, when: consul_install_dnsmasq }
 - include: consulate.yml
 - include: service.yml
 - { include: wan.yml, when: consul_join_wan_addrs is defined }

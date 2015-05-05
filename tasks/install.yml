@@ -88,3 +88,5 @@
     owner={{consul_user}}
     group={{consul_group}}
     mode=0755
+  notify:
+    - restart consul
