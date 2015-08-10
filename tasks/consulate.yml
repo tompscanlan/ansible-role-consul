@@ -3,6 +3,8 @@
   apt: >
     update_cache=yes
     cache_valid_time=3600
+  when: ansible_os_family == 'Debian'
+
 
 - name: install deps
   apt: >
@@ -11,6 +13,7 @@
   with_items:
     - python-pip
     - python-dev
+  when: ansible_os_family == 'Debian'
 
 - name: install python module consulate
   pip: >

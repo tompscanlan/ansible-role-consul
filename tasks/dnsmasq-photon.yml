@@ -1,0 +1,59 @@
+
+- name: download dnsmasq
+  get_url: >
+    url={{consul_dnsmasq_download}}
+    dest={{consul_download_folder}}
+    validate_certs=no
+  register: dnsmasq_was_downloaded
+
+- name: install deps
+  yum:
+    name: "{{ item }}"
+    state: installed
+  with_items:
+    - gcc
+    - make
+    - glibc-devel
+    - linux-api-headers
+    - tar
+
+- name: copy and unpack
+  unarchive: >
+    src={{ consul_download_folder }}/{{ consul_dnsmasq_archive }}
+    dest={{ consul_download_folder }}
+    copy=no
+  when: dnsmasq_was_downloaded
+
+- name: build dnsmasq
+  shell: cd {{ consul_download_folder }}/{{ consul_dnsmasq_package }} && make && make install
+
+- name: add conf directory
+  file: group=root owner=root path={{ consul_dnsmasq_conf_dir }} state=directory
+
+
+- name: copy dnsmasq systemd script
+  template: >
+    src=photon-dnsmasq.service.j2
+    dest=/etc/systemd/system/dnsmasq.service
+    owner=root
+    group=root
+    mode=0644
+
+- name: configure dnsmasq
+  copy: >
+    content='server=/{{ consul_domain }}/127.0.0.1#8600'
+    dest={{ consul_dnsmasq_conf_dir }}/10-consul
+  notify:
+    - restart dnsmasq
+
+- name: enable dnsmasq
+  service: name=dnsmasq state=started enabled=yes
+
+
+- name: tell systemd to use dnsmasq
+  lineinfile:
+    dest: /etc/systemd/resolved.conf
+    regexp: "^DNS=.*"
+    line: "DNS=127.0.0.1"
+    state: present
+  notify: restart systemd-resolved

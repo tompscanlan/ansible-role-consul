@@ -1,0 +1,23 @@
+- name: download consul-ui
+  get_url: >
+    url={{consul_ui_download}}
+    dest={{consul_download_folder}}
+    validate_certs=no
+  register: consul_ui_was_downloaded
+
+- name: copy and unpack
+  unarchive: >
+    src={{ consul_download_folder }}/{{ consul_ui_archive }}
+    dest={{ consul_home }}
+    copy=no
+  when: consul_ui_was_downloaded|changed
+
+- name: set ownership
+  file: >
+    state=directory
+    path={{consul_ui_dir}}
+    owner={{consul_user}}
+    group={{consul_group}}
+    recurse=yes
+  when: consul_ui_was_downloaded|changed
+

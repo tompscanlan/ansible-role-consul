@@ -1,7 +1,22 @@
 ---
-- include: install.yml
-- { include: install-ui.yml, when: consul_is_ui }
-- { include: dnsmasq.yml, when: consul_install_dnsmasq }
+- include: install-ubuntu.yml
+  when: ansible_os_family == 'Debian'
+
+- include: install-photon.yml
+  when: ansible_lsb.codename == 'Photon'
+
+- include: install-ui.yml
+  when: consul_is_ui and ansible_os_family == 'Debian'
+
+- include: install-ui-photon.yml
+  when: consul_is_ui and ansible_lsb.codename == 'Photon'
+
+- include: dnsmasq.yml
+  when: consul_install_dnsmasq and ansible_os_family == 'Debian'
+
+- include: dnsmasq-photon.yml
+  when: consul_install_dnsmasq and ansible_lsb.codename == 'Photon'
+
 - include: consulate.yml
 - include: service.yml
 - { include: wan.yml, when: consul_join_wan_addrs is defined }

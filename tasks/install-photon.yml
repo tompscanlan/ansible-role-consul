@@ -1,0 +1,86 @@
+---
+
+- name: install deps
+  yum: name={{ item }} state=installed
+  with_items:
+    - unzip
+#    - jq
+
+- name: download consul
+  get_url: >
+    url={{consul_download}}
+    dest={{consul_download_folder}}
+    validate_certs=no
+  register: consul_was_downloaded
+
+- name: create consul group
+  group: >
+    name={{consul_group}}
+    state=present
+
+- name: create consul user
+  user: >
+    name={{consul_user}}
+    group={{consul_group}}
+
+- name: create consul directory
+  file: >
+    state=directory
+    path={{ item }}
+    owner={{consul_user}}
+    group={{consul_group}}
+  with_items:
+    - "{{ consul_home }}"
+    - "{{ consul_home }}/bin"
+    - "{{ consul_data_dir }}"
+    - "{{ consul_config_dir }}"
+
+- name: copy and unpack
+  unarchive: >
+    src={{ consul_download_folder }}/{{ consul_archive }}
+    dest={{ consul_home }}/bin
+    copy=no
+  when: consul_was_downloaded|changed
+
+- name: set ownership
+  file: >
+    state=directory
+    path={{consul_home}}
+    owner={{consul_user}}
+    group={{consul_group}}
+    recurse=yes
+  when: consul_was_downloaded|changed
+
+- name: copy consul systemd script
+  template: >
+    src=photon-consul.service.j2
+    dest=/etc/systemd/system/consul.service
+    owner=root
+    group=root
+    mode=0644
+
+- name: add consul to path through profile.d
+  template: >
+    src=consul.sh.j2
+    dest=/etc/profile.d/consul.sh
+    owner=root
+    group=root
+    mode=0755
+
+- name: copy consulkv script
+  template: >
+    src=consulkv.j2
+    dest={{consul_home}}/bin/consulkv
+    owner={{consul_user}}
+    group={{consul_group}}
+    mode=0755
+
+- name: consul config file
+  template: >
+    src=consul.json.j2
+    dest={{ consul_config_file }}
+    owner={{consul_user}}
+    group={{consul_group}}
+    mode=0755
+  notify:
+    - restart consul

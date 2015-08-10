@@ -31,3 +31,9 @@ consul_ui_auth_user_file: /etc/htpasswd/consul
 consul_enable_nginx_config: true
 consul_disable_remote_exec: true
 consul_install_dnsmasq: true
+
+consul_dnsmasq_version: 2.75
+consul_dnsmasq_package: dnsmasq-{{ consul_dnsmasq_version }}
+consul_dnsmasq_archive: "{{ consul_dnsmasq_package }}.tar.xz"
+consul_dnsmasq_download: http://www.thekelleys.org.uk/dnsmasq/{{ consul_dnsmasq_archive }}
+consul_dnsmasq_conf_dir: /etc/consul_dnsmasq.d
