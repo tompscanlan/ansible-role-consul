@@ -1,4 +1,5 @@
 # Ansible Consul Role
+WOT is this garbage!
 
 > `consul` is an [ansible](http://www.ansible.com) role which: 
 > 
